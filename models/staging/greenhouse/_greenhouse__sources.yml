@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: greenhouse
+    description: ATS export (Greenhouse-like) landed by the ELT connector.
+    schema: raw_greenhouse
+    tables:
+      - name: jobs
+        description: One row per requisition. Departments follow the ATS taxonomy, not the HRIS one.
+      - name: applications
+        description: One row per candidate application to a job, with the furthest stage reached.
+      - name: offers
+        description: One row per offer extended; a job can have a declined offer before the accepted one.

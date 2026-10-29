@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: stg_hris__workers
+    description: One row per worker. worker_type separates employees from contractors.
+    columns:
+      - name: employee_id
+        data_tests: [unique, not_null]
+      - name: worker_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["employee", "contractor"]
+
+  - name: stg_hris__employment_events
+    description: Hire, rehire and termination events, one row per event after removing connector duplicates.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: employee_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_hris__workers')
+                field: employee_id
+      - name: event_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["hire", "rehire", "termination"]
+      - name: termination_type
+        description: Required for terminations, empty for hires.
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'termination'"
+          - accepted_values:
+              arguments:
+                values: ["voluntary", "involuntary"]
+      - name: is_regretted
+        description: Required for voluntary terminations (was this a loss we wanted to avoid?).
+        data_tests:
+          - not_null:
+              config:
+                where: "termination_type = 'voluntary'"
+
+  - name: stg_hris__job_history
+    description: Effective-dated job records with canonical departments; one row per employee and effective date.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: ["employee_id", "effective_date"]
+    columns:
+      - name: department
+        description: Canonical department. Null means a new spelling appeared in the HRIS and is missing from the mapping seed.
+        data_tests: [not_null]
+      - name: employee_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_hris__workers')
+                field: employee_id

@@ -1,0 +1,17 @@
+source_system,raw_department,department
+hris,engineering,Engineering
+hris,sales,Sales
+hris,customer success,Customer Success
+hris,cust. success,Customer Success
+hris,marketing,Marketing
+hris,finance,Finance
+hris,finance & accounting,Finance
+hris,people,People
+hris,people & culture,People
+hris,hr,People
+greenhouse,r&d - engineering,Engineering
+greenhouse,go-to-market - sales,Sales
+greenhouse,go-to-market - customer success,Customer Success
+greenhouse,go-to-market - marketing,Marketing
+greenhouse,g&a - finance,Finance
+greenhouse,g&a - people,People

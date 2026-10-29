@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: stg_greenhouse__jobs
+    description: Requisitions with the ATS department mapped to the canonical department.
+    columns:
+      - name: job_id
+        data_tests: [unique, not_null]
+      - name: department
+        description: Null means a new ATS department name is missing from the mapping seed.
+        data_tests: [not_null]
+      - name: job_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["open", "closed"]
+
+  - name: stg_greenhouse__applications
+    columns:
+      - name: application_id
+        data_tests: [unique, not_null]
+      - name: job_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_greenhouse__jobs')
+                field: job_id
+      - name: furthest_stage
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["application_review", "phone_screen", "onsite", "offer"]
+      - name: application_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["active", "rejected", "hired"]
+
+  - name: stg_greenhouse__offers
+    columns:
+      - name: offer_id
+        data_tests: [unique, not_null]
+      - name: application_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_greenhouse__applications')
+                field: application_id
+      - name: offer_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["accepted", "rejected"]
+      - name: start_date
+        data_tests:
+          - not_null:
+              config:
+                where: "offer_status = 'accepted'"

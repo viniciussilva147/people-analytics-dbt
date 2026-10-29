@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: hris
+    description: HRIS export (Dayforce-like) landed by the ELT connector. Raw, untouched.
+    schema: raw_hris
+    tables:
+      - name: workers
+        description: One row per worker ever registered, employees and contractors.
+      - name: employment_events
+        description: >
+          Effective-dated hire, rehire and termination events. Termination effective_date is the last day worked.
+          The connector occasionally lands the same event twice (identical rows, different _fivetran_synced).
+      - name: job_history
+        description: >
+          Effective-dated job records (department, level, manager). Corrections are keyed as a new row with the
+          same effective_date and a later entered_at.

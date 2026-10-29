@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: int_month_spine
+    description: Calendar months in the reporting window (vars start_date and as_of_date).
+    columns:
+      - name: month_start
+        data_tests: [unique, not_null]
+
+  - name: int_employment_spells
+    description: >
+      One row per employment spell (hire or rehire until termination). A start event can match at most one
+      termination and a termination can belong to at most one spell; the unique tests enforce both.
+    columns:
+      - name: spell_id
+        data_tests: [unique, not_null]
+      - name: start_event_id
+        data_tests: [unique, not_null]
+      - name: termination_event_id
+        data_tests: [unique]
+
+  - name: int_job_history_ranges
+    description: Job records as validity ranges (valid_from, valid_to), one range per employee per effective date.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: ["employee_id", "valid_from"]

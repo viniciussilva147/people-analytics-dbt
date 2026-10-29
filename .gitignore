@@ -1,0 +1,10 @@
+warehouse.duckdb
+warehouse.duckdb.wal
+target/
+logs/
+dbt_packages/
+exports/
+__pycache__/
+.venv/
+.user.yml
+.DS_Store

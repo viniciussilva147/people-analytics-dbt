@@ -1,0 +1,24 @@
+version: 2
+
+seeds:
+  - name: department_mapping
+    description: >
+      Maps the free-text department names from each source system to one canonical department.
+      raw_department is stored lower-cased and trimmed; staging models apply the same normalization before joining.
+      A new spelling in a source system fails the not_null test on the staging department column until it is added here.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: ["source_system", "raw_department"]
+    columns:
+      - name: source_system
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["hris", "greenhouse"]
+      - name: department
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Engineering", "Sales", "Customer Success", "Marketing", "Finance", "People"]

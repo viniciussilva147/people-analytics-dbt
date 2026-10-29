@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: fct_employment_spells
+    description: >
+      One row per employment spell with worker type, department at hire and at exit, tenure and the
+      is_in_workforce_metrics switch (employees only, no-shows excluded) that every workforce metric uses.
+    columns:
+      - name: spell_id
+        data_tests: [unique, not_null]
+      - name: department_at_hire
+        description: Department on the hire date. Null would mean the job history does not cover the hire date.
+        data_tests: [not_null]
+      - name: department_at_exit
+        data_tests:
+          - not_null:
+              config:
+                where: "last_day_worked is not null"
+
+  - name: dim_employees
+    description: One row per worker, with status and job as of var('as_of_date'). Former workers keep the job held on their last day.
+    columns:
+      - name: employee_id
+        data_tests: [unique, not_null]
+      - name: current_department
+        data_tests: [not_null]
+
+  - name: fct_workforce_monthly
+    description: >
+      Company-level monthly roll-forward: opening headcount, hires, exits by type, closing headcount, attrition
+      rates (monthly and trailing twelve months) and the restatement caused by late-entered terminations.
+      Definitions are in the model header.
+    columns:
+      - name: month_start
+        data_tests: [unique, not_null]
+      - name: headcount_end
+        description: Employees active at the end of the last day of the month (restated with all known events).
+      - name: headcount_end_as_reported
+        description: Same count using only terminations entered in the HRIS by month end, i.e. what a report run that day showed.
+      - name: restatement_delta
+        description: headcount_end_as_reported minus headcount_end. Positive = people still counted because their exit was keyed late.
+
+  - name: fct_attrition_by_department_monthly
+    description: Monthly headcount and exits by department. Sums to fct_workforce_monthly every month (tested).
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: ["month_start", "department"]
+
+  - name: fct_recruiting_funnel
+    description: One row per requisition with funnel volumes, offer outcome, time to fill and the HRIS employee hired.
+    columns:
+      - name: job_id
+        data_tests: [unique, not_null]
+      - name: offers_accepted
+        description: At most one accepted offer per requisition.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+                quote: false
